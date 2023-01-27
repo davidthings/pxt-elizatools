@@ -1,5 +1,6 @@
 {
     "name": "pxt-elizatools",
+    "version": "0.1.0",
     "description": "",
     "dependencies": {
         "core": "*",
