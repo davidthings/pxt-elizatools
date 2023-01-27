@@ -121,6 +121,12 @@ class Color {
         this.blue = (c >> 0) & 0xFF;
     }
 
+    //% block="get color number from $this"
+    //% this.defl=color
+    public getColorNumber() : number {
+        return ( this.red << 16 ) | ( this.green << 8 ) | ( this.blue );
+    }
+
     //% block="show $this"
     //% this.defl=color
     //% this.shadow=variables_get
