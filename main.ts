@@ -1,22 +1,42 @@
 //% color="#FE99F8"
 namespace elizatools {
 
-    //% block="Set Tiny LED to $c"
-    //% blockSetVariable=color
-    //% group="Tiny LED"
-    export function tinyLed( c:Color ) {
+    //% block="Set Tiny LED to Color $c"
+    //% group="TinyLED"
+    //% c.defl=color
+    export function tinyLedColor( c:Color ) {
         let b = pins.createBuffer(3)
         b[ 0 ] = c.red;
         b[ 1 ] = c.green;
         b[ 2 ] = c.blue;
-        ws2812b.sendBuffer(b, 8);
+        ws2812b.sendBuffer(b, DigitalPin.P8);
     }
 
+    //% block="Set Tiny LED $cv"
+    //% group="TinyLED"
+    //% cv.shadow="colorNumberPicker"
+    export function tinyLedDirect(cv:number) {
+        let b = pins.createBuffer(3)
+        b[0] = (cv >> 16) & 0xFF;
+        b[1] = (cv >> 8) & 0xFF;
+        b[2] = (cv >> 0) & 0xFF;
+        ws2812b.sendBuffer(b, DigitalPin.P8);
+    }
+
+
     //% block="create color"
-    //% blockSetVariable=color
     //% group="Color"
     export function createColor(): Color {
-        return new Color();
+        return new Color( 0, 0, 0);
+    }
+
+    //% block="create specified color $cv"
+    //% cv.shadow="colorNumberPicker"
+    //% group="Color"
+    export function createSpecifiedColor( cv:number ): Color {
+        let c = new Color( 0, 0, 0 );
+        c.selectColor( cv );
+        return c;
     }
 
     // //% block="select color $v for $color"
@@ -38,14 +58,14 @@ namespace elizatools {
     //% block
     //% group="ColorSensor"
     export function colorSensorRead( ) : Color {
-        let c = new Color();
+        let d = new Color();
         colorSensorConfigure();
         if (colorSensorConfigured) {
-            c.red = i2cReadRegister16(41, 184) >> 8;
-            c.green = i2cReadRegister16(41, 186) >> 8;
-            c.blue = i2cReadRegister16(41, 188) >> 8;
+            d.red = i2cReadRegister16(41, 184) >> 8;
+            d.green = i2cReadRegister16(41, 186) >> 8;
+            d.blue = i2cReadRegister16(41, 188) >> 8;
         }
-        return c;
+        return d;
     }
 
     function colorSensorConfigure() {
@@ -122,6 +142,7 @@ class Color {
         this.green = 0;
         this.blue = 0;
     }
+
 
     //% block="select color $c for $this"
     //% this.defl=color
