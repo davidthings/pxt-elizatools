@@ -1,24 +1,23 @@
 //% color="#FE99F8"
 namespace elizatools {
 
-    // //% block="Set Tiny LED to Color $c"
-    // //% group="TinyLED"
-    // //% c.defl=color
-    // export function tinyLedColor( c:Color ) {
-    //     let b = pins.createBuffer(3)
-    //     b[ 0 ] = c.red;
-    //     b[ 1 ] = c.green;
-    //     b[ 2 ] = c.blue;
-    //     ws2812b.sendBuffer(b, DigitalPin.P8);
-    // }
+    //% block="Set Tiny LED to Color $c"
+    //% group="TinyLED"
+    export function tinyLedColor( c:Color ) {
+        let b = pins.createBuffer(3)
+        b[ 1 ] = c.red;
+        b[ 0 ] = c.green;
+        b[ 2 ] = c.blue;
+        ws2812b.sendBuffer(b, DigitalPin.P8);
+    }
 
     //% block="Set Tiny LED $cv"
     //% group="TinyLED"
     //% cv.shadow="colorNumberPicker"
     export function tinyLedDirect(cv:number) {
         let b = pins.createBuffer(3)
-        b[0] = (cv >> 16) & 0xFF;
-        b[1] = (cv >> 8) & 0xFF;
+        b[1] = (cv >> 16) & 0xFF;
+        b[0] = (cv >> 8) & 0xFF;
         b[2] = (cv >> 0) & 0xFF;
         ws2812b.sendBuffer(b, DigitalPin.P8);
     }
@@ -148,9 +147,9 @@ class Color {
     //% this.defl=color
     //% c.shadow="colorNumberPicker"
     public selectColor( c:number ) {
-        this.red = (c >> 16) & 0xFF;
-        this.green = (c >> 8) & 0xFF;
         this.blue = (c >> 0) & 0xFF;
+        this.green = (c >> 8) & 0xFF;
+        this.red = (c >> 16) & 0xFF;
     }
 
     //% block="get color number from $this"
