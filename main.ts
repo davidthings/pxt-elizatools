@@ -1,6 +1,17 @@
 //% color="#FE99F8"
 namespace elizatools {
 
+    //% block="Set Tiny LED to $c"
+    //% blockSetVariable=color
+    //% group="Tiny LED"
+    export function tinyLed( c:Color ) {
+        let b = pins.createBuffer(3)
+        b[ 0 ] = c.red;
+        b[ 1 ] = c.green;
+        b[ 2 ] = c.blue;
+        ws2812b.sendBuffer(b, 8);
+    }
+
     //% block="create color"
     //% blockSetVariable=color
     //% group="Color"
