@@ -8,7 +8,7 @@ namespace elizatools {
         b[ 1 ] = c.red;
         b[ 0 ] = c.green;
         b[ 2 ] = c.blue;
-        ws2812b.sendBuffer(b, DigitalPin.P8);
+        ws2812b.sendBuffer(b, DigitalPin.P16);
     }
 
     //% block="Set Tiny LED $cv"
@@ -19,7 +19,7 @@ namespace elizatools {
         b[1] = (cv >> 16) & 0xFF;
         b[0] = (cv >> 8) & 0xFF;
         b[2] = (cv >> 0) & 0xFF;
-        ws2812b.sendBuffer(b, DigitalPin.P8);
+        ws2812b.sendBuffer(b, DigitalPin.P16);
     }
 
 
