@@ -22,6 +22,46 @@ namespace elizatools {
         ws2812b.sendBuffer(b, DigitalPin.P16);
     }
 
+    //% block="Set Ring LED to Color $c"
+    //% group="TinyLED"
+    export function ringColor(c: Color) {
+        let b = pins.createBuffer(24*4)
+
+        for ( let i = 0; i < 24; i++ ) {
+            b[i * 4 + 1] = c.red;
+            b[i * 4 + 0] = c.green;
+            b[i * 4 + 2] = c.blue;
+            b[i * 4 + 3] = 0;
+        }
+        ws2812b.sendBuffer(b, DigitalPin.P8);
+    }
+
+    //% block="Set Ring LED $cv"
+    //% group="TinyLED"
+    //% cv.shadow="colorNumberPicker"
+    export function ringDirect(cv: number) {
+        let b = pins.createBuffer(24*4)
+
+        for (let i = 0; i < 24; i++) {
+            b[i * 4 + 1] = (cv >> 16) & 0xFF;
+            b[i * 4 + 0] = (cv >> 8) & 0xFF;
+            b[i * 4 + 2] = (cv >> 0) & 0xFF;
+            b[i * 4 + 3] = 0x00;
+        }
+        ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGBW );
+        ws2812b.sendBuffer(b, DigitalPin.P8 );
+
+        // let b = pins.createBuffer(4)
+        // b[1] = (cv >> 16) & 0xFF;
+        // b[0] = (cv >> 8) & 0xFF;
+        // b[2] = (cv >> 0) & 0xFF;
+        // b[3] =  0xFF;
+        // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGBW );
+        // ws2812b.sendBuffer(b, DigitalPin.P8);
+
+    }
+
+
 
     //% block="create color"
     //% group="Color"
@@ -43,6 +83,22 @@ namespace elizatools {
     // export function selectColor( c:Color, v:number) {
     //     c.selectColor( v );
     // }
+
+    //% block
+    //% group="Charger"
+    export function checkCharger(): boolean {
+        let id = i2cReadRegister8( 0x6B, 0x48 )
+        // basic.showNumber( id )
+        return ( id == 0x19 )
+    }
+
+    //% block
+    //% group="IMU"
+    export function checkIMU(): boolean {
+        let id = i2cReadRegister8( 0x68, 0x75 )
+        return (id == 0x4E)
+    }
+
 
     //% block
     //% group="ColorSensor"
