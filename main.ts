@@ -1,88 +1,23 @@
-//% color="#FE99F8"
 namespace elizatools {
 
-    //% block="Set Tiny LED to Color $c"
-    //% group="TinyLED"
-    export function tinyLedColor( c:Color ) {
-        let b = pins.createBuffer(3)
-        b[ 1 ] = c.red;
-        b[ 0 ] = c.green;
-        b[ 2 ] = c.blue;
-        ws2812b.sendBuffer(b, DigitalPin.P16);
-    }
-
-    //% block="Set Tiny LED $cv"
-    //% group="TinyLED"
-    //% cv.shadow="colorNumberPicker"
-    export function tinyLedDirect(cv:number) {
-        let b = pins.createBuffer(3)
-        b[1] = (cv >> 16) & 0xFF;
-        b[0] = (cv >> 8) & 0xFF;
-        b[2] = (cv >> 0) & 0xFF;
-        ws2812b.sendBuffer(b, DigitalPin.P16);
-    }
-
-    //% block="Set Ring LED to Color $c"
-    //% group="TinyLED"
-    export function ringColor(c: Color) {
-        let b = pins.createBuffer(24*4)
-
-        for ( let i = 0; i < 24; i++ ) {
-            b[i * 4 + 1] = c.red;
-            b[i * 4 + 0] = c.green;
-            b[i * 4 + 2] = c.blue;
-            b[i * 4 + 3] = 0;
-        }
-        ws2812b.sendBuffer(b, DigitalPin.P8);
-    }
+    // Packing into number:  ( r << 16 ) | (g << 8 ) | b
+    // Sending to ws2812   ---b---g---r--->
 
     //% block="Set Ring LED $cv"
     //% group="TinyLED"
     //% cv.shadow="colorNumberPicker"
     export function ringDirect(cv: number) {
-        let b = pins.createBuffer(24*4)
+        let e = pins.createBuffer(24*3)
 
-        for (let i = 0; i < 24; i++) {
-            b[i * 4 + 1] = (cv >> 16) & 0xFF;
-            b[i * 4 + 0] = (cv >> 8) & 0xFF;
-            b[i * 4 + 2] = (cv >> 0) & 0xFF;
-            b[i * 4 + 3] = 0x00;
+        for (let j = 0; j < 24; j++) {
+            e[j * 3 + 0] = (cv >> 16) & 0xFF;
+            e[j * 3 + 1] = (cv >> 8) & 0xFF;
+            e[j * 3 + 3] = (cv >> 0) & 0xFF;
+            //e[j * 4 + 3 ] = 0;
         }
-        ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGBW );
-        ws2812b.sendBuffer(b, DigitalPin.P8 );
-
-        // let b = pins.createBuffer(4)
-        // b[1] = (cv >> 16) & 0xFF;
-        // b[0] = (cv >> 8) & 0xFF;
-        // b[2] = (cv >> 0) & 0xFF;
-        // b[3] =  0xFF;
-        // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGBW );
-        // ws2812b.sendBuffer(b, DigitalPin.P8);
-
+        ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
+        ws2812b.sendBuffer(e, DigitalPin.P8 );
     }
-
-
-
-    //% block="create color"
-    //% group="Color"
-    export function createColor(): Color {
-        return new Color( 0, 0, 0);
-    }
-
-    //% block="create specified color $cv"
-    //% cv.shadow="colorNumberPicker"
-    //% group="Color"
-    export function createSpecifiedColor( cv:number ): Color {
-        let c = new Color( 0, 0, 0 );
-        c.selectColor( cv );
-        return c;
-    }
-
-    // //% block="select color $v for $color"
-    // //% v.shadow="colorNumberPicker"
-    // export function selectColor( c:Color, v:number) {
-    //     c.selectColor( v );
-    // }
 
     //% block
     //% group="Charger"
@@ -95,32 +30,34 @@ namespace elizatools {
     //% block
     //% group="IMU"
     export function checkIMU(): boolean {
-        let id = i2cReadRegister8( 0x68, 0x75 )
-        return (id == 0x4E)
+        let id2 = i2cReadRegister8( 0x68, 0x75 )
+        return (id2 == 0x4E)
     }
 
 
     //% block
     //% group="ColorSensor"
     export function checkColorSensor(): boolean {
-        let id = i2cReadRegister8( 41, 178 )
+        let id3 = i2cReadRegister8( 41, 178 )
         // basic.showNumber( id )
-        return ( id == 68 )
+        return ( id3 == 68 )
     }
 
     let colorSensorConfigured : boolean = false;
 
     //% block
     //% group="ColorSensor"
-    export function colorSensorRead( ) : Color {
-        let d = new Color();
+    export function colorSensorReadNumber(): number {
+        let r = 0;
+        let b = 0;
+        let g = 0;
         colorSensorConfigure();
         if (colorSensorConfigured) {
-            d.red = i2cReadRegister16(41, 184) >> 8;
-            d.green = i2cReadRegister16(41, 186) >> 8;
-            d.blue = i2cReadRegister16(41, 188) >> 8;
+            r = i2cReadRegister16(41, 0x8 | 0x16) >> 8;
+            g = i2cReadRegister16(41, 0x8 | 0x18) >> 8;
+            b = i2cReadRegister16(41, 0x8 | 0x1A) >> 8;
         }
-        return d;
+        return ( r << 16 ) | (g << 8 ) | b;
     }
 
     function colorSensorConfigure() {
@@ -178,52 +115,6 @@ namespace elizatools {
     //% group="Misc"
     export function showA0() {
         basic.showNumber(pins.analogReadPin(AnalogPin.P0))
-    }
-
-}
-
-//% color="#FE99F8"
-class Color {
-
-    //% blockCombine
-    public red: number;
-    //% blockCombine
-    public green: number;
-    //% blockCombine
-    public blue: number;
-
-    constructor( red:number = 0, green:number = 0, blue:number = 0 ) {
-        this.red = 0;
-        this.green = 0;
-        this.blue = 0;
-    }
-
-
-    //% block="select color $c for $this"
-    //% this.defl=color
-    //% c.shadow="colorNumberPicker"
-    public selectColor( c:number ) {
-        this.blue = (c >> 0) & 0xFF;
-        this.green = (c >> 8) & 0xFF;
-        this.red = (c >> 16) & 0xFF;
-    }
-
-    //% block="get color number from $this"
-    //% this.defl=color
-    public getColorNumber() : number {
-        return ( this.red << 16 ) | ( this.green << 8 ) | ( this.blue );
-    }
-
-    //% block="show $this"
-    //% this.defl=color
-    //% this.shadow=variables_get
-    public show() {
-        basic.showString("R")
-        basic.showNumber(this.red);
-        basic.showString("G")
-        basic.showNumber(this.green);
-        basic.showString("B")
-        basic.showNumber(this.blue);
     }
 
 }
