@@ -56,6 +56,26 @@ namespace elizatools {
         return (id2 == 0x4E)
     }
 
+    //% block
+    //% group="Distance"
+    export function distance(): number {
+        let trig:DigitalPin = 1;
+        let echo:DigitalPin = 2;
+        let maxMmDistance = 5000
+        // send pulse
+        pins.setPull(trig, PinPullMode.PullNone);
+        pins.digitalWritePin(trig, 0);
+        control.waitMicros(2);
+        pins.digitalWritePin(trig, 1);
+        control.waitMicros(10);
+        pins.digitalWritePin(trig, 0);
+
+        // read pulse
+        const d = pins.pulseIn(echo, PulseValue.High, maxMmDistance * 6);
+
+        return Math.idiv(d, 6);
+    }
+
 
     //% block
     //% group="ColorSensor"
