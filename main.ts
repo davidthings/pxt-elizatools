@@ -1,4 +1,3 @@
-//% color="#FE99F8"
 namespace elizatools {
 
     // Packing into number:  ( r << 16 ) | (g << 8 ) | b
@@ -21,6 +20,25 @@ namespace elizatools {
         }
         ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
         ws2812b.sendBuffer(e, DigitalPin.P8 );
+    }
+
+    //% block="set head leds $cv"
+    //% group="Ring"
+    //% cv.shadow="colorNumberPicker"
+    export function headDirect(cv: number) {
+        let e = pins.createBuffer(3 * 3)
+
+        let rColor = (cv >> 16) & 0xFF;
+        let gColor = (cv >> 8) & 0xFF;
+        let bColor = (cv >> 0) & 0xFF;
+
+        for (let j = 0; j < 25; j++) {
+            e[j * 3 + 0] = gColor;
+            e[j * 3 + 1] = rColor;
+            e[j * 3 + 2] = bColor;
+        }
+        ws2812b.setBufferMode(DigitalPin.P16, ws2812b.BUFFER_MODE_RGB);
+        ws2812b.sendBuffer(e, DigitalPin.P16);
     }
 
     //% block
@@ -61,24 +79,24 @@ namespace elizatools {
             gSense = i2cReadRegister16(0x29, 0xA0 | 0x18);
             bSense = i2cReadRegister16(0x29, 0xA0 | 0x1A);
         }
-        let rColor = ( rSense >> 8 ) & 0xFF;
-        let gColor = ( gSense >> 8 ) & 0xFF;
-        let bColor = ( bSense >> 8 ) & 0xFF;
+        let rColor2 = ( rSense >> 8 ) & 0xFF;
+        let gColor2 = ( gSense >> 8 ) & 0xFF;
+        let bColor2 = ( bSense >> 8 ) & 0xFF;
 
-        rColor = Math.pow( rColor, 2.5 );
-        gColor = Math.pow( gColor, 2.5 );
-        bColor = Math.pow( bColor, 2.5 );
+        rColor2 = Math.pow( rColor2, 2.5 );
+        gColor2 = Math.pow( gColor2, 2.5 );
+        bColor2 = Math.pow( bColor2, 2.5 );
 
-        let cMax = (rColor > gColor) ? rColor : gColor;
-        cMax = (bColor > cMax) ? bColor : cMax;
+        let cMax = (rColor2 > gColor2) ? rColor2 : gColor2;
+        cMax = (bColor2 > cMax) ? bColor2 : cMax;
 
-        rColor = 0x0F * rColor / cMax;
-        gColor = 0x0F * gColor / cMax;
-        bColor = 0x0F * bColor / cMax;
+        rColor2 = 0x0F * rColor2 / cMax;
+        gColor2 = 0x0F * gColor2 / cMax;
+        bColor2 = 0x0F * bColor2 / cMax;
 
         // basic.showNumber( rColor >> 4 );
 
-        return ( rColor << 16 ) | (gColor << 8 ) | bColor;
+        return ( rColor2 << 16 ) | (gColor2 << 8 ) | bColor2;
     }
 
     function colorSensorConfigure() {
