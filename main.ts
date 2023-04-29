@@ -59,10 +59,10 @@ namespace elizatools {
     //% block
     //% group="Distance"
     export function distance(): number {
-        let trig:DigitalPin = 1;
-        let echo:DigitalPin = 2;
-        let maxMmDistance = 5000
-        // send pulse
+        let trig = DigitalPin.P1;
+        let echo = DigitalPin.P2;
+        let maxCMDistance = 100 * 58;
+        
         pins.setPull(trig, PinPullMode.PullNone);
         pins.digitalWritePin(trig, 0);
         control.waitMicros(2);
@@ -71,9 +71,9 @@ namespace elizatools {
         pins.digitalWritePin(trig, 0);
 
         // read pulse
-        const d = pins.pulseIn(echo, PulseValue.High, maxMmDistance * 6);
+        const d = pins.pulseIn(echo, PulseValue.High, maxCMDistance ); 
 
-        return Math.idiv(d, 6);
+        return Math.idiv( d, 58 );
     }
 
 
