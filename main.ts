@@ -76,7 +76,6 @@ namespace elizatools {
         return Math.idiv( d, 58 );
     }
 
-
     //% block
     //% group="ColorSensor"
     export function checkColorSensor(): boolean {
