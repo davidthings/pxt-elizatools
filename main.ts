@@ -76,9 +76,21 @@ namespace elizatools {
         return Math.idiv( d, 58 );
     }
 
+    // 
+
     let colorSensorConfigured: boolean = false;
     let colorSensorAddress: number = 0x39;
-    let colorSensorIdRegister: number = 0x92;
+    let colorSensorEnableRegister : number = 0x80;
+    let colorSensorATimeRegister  : number = 0x81;
+    let colorSensorWTimeRegister  : number = 0x83;
+    let colorSensorPersRegister   : number = 0x8C;
+    let colorSensorAGainRegister  : number = 0x8F;
+    let colorSensorIdRegister     : number = 0x92;
+    let colorSensorStatusRegister : number = 0x93;
+    let colorSensorRedRegister    : number = 0x96;
+    let colorSensorGreenRegister  : number = 0x98;
+    let colorSensorBlueRegister   : number = 0x9A;
+
     let colorSensorId:number = 0x90;
 
     //% block
@@ -99,16 +111,36 @@ namespace elizatools {
 
     //% block
     //% group="ColorSensor"
+    export function colorSensorReadStatus(): number {
+        let status = i2cReadRegister8(colorSensorAddress, colorSensorStatusRegister );
+        // basic.showNumber( id )
+        return status;
+    }
+
+    //% block
+    //% group="ColorSensor"
+    export function colorSensorReadEnable(): number {
+        let status = i2cReadRegister8(colorSensorAddress, colorSensorEnableRegister);
+        // basic.showNumber( id )
+        return status;
+    }
+
+    //% block
+    //% group="ColorSensor"
     export function colorSensorRead(): number {
-        let rSense = 0;
-        let bSense = 0;
-        let gSense = 0;
+        let rSense:number = 0;
+        let bSense:number = 0;
+        let gSense:number = 0;
+
         colorSensorConfigure();
-        if (colorSensorConfigured) {
-            rSense = i2cReadRegister16(colorSensorAddress, 0xA0 | 0x16);
-            gSense = i2cReadRegister16(colorSensorAddress, 0xA0 | 0x18);
-            bSense = i2cReadRegister16(colorSensorAddress, 0xA0 | 0x1A);
-        }
+        
+        // if (colorSensorConfigured) {
+            rSense = i2cReadRegister16(colorSensorAddress, colorSensorRedRegister );
+            gSense = i2cReadRegister16(colorSensorAddress, colorSensorGreenRegister );
+            bSense = i2cReadRegister16(colorSensorAddress, colorSensorBlueRegister);
+        //}
+
+/*
         let rColor22 = ( rSense >> 8 ) & 0xFF;
         let gColor22 = ( gSense >> 8 ) & 0xFF;
         let bColor22 = ( bSense >> 8 ) & 0xFF;
@@ -127,23 +159,37 @@ namespace elizatools {
         // basic.showNumber( rColor >> 4 );
 
         return ( rColor22 << 16 ) | (gColor22 << 8 ) | bColor22;
+*/
+
+    return rSense + gSense + bSense;
+
     }
 
     function colorSensorConfigure() {
-        if ( !colorSensorConfigured && checkColorSensor() ) {
+        // if ( !colorSensorConfigured && checkColorSensor() ) {
             // turn it on
-            // Control Reg:  PON AEN
-            i2cWriteRegister(colorSensorAddress, (0x00 + 0x80), 3)
+            // Control Reg:  PON
+            i2cWriteRegister(colorSensorAddress, colorSensorEnableRegister, 0x01 )
+
             basic.pause(100)
-            // RGB TIMING:FF 2.4ms, C0 150ms, 16b
-            i2cWriteRegister(colorSensorAddress, (0x01 + 0x80), 0xC0 )
+
+            // ATime  :RGB TIMING:FF 2.4ms, C0 150ms
+            i2cWriteRegister(colorSensorAddress, colorSensorATimeRegister, 0xC0 )
             // Wait Time:FF 2.4ms
-            i2cWriteRegister(colorSensorAddress, (0x03 + 0x80), 0xFF )
+            i2cWriteRegister(colorSensorAddress, colorSensorWTimeRegister, 0xFF )
             // Persistance: 0x00 - IRQ every time
-            i2cWriteRegister(colorSensorAddress, (0x0C + 0x80), 0)
+            i2cWriteRegister(colorSensorAddress, colorSensorPersRegister, 0 )
+            // AGain: 0 - 3
+            i2cWriteRegister(colorSensorAddress, colorSensorAGainRegister, 3 )
+
+            // Control Reg:  PON AEN
+            i2cWriteRegister(colorSensorAddress, colorSensorEnableRegister, 0x08 | 0x03)
+            basic.pause(100)
+
+
 //            basic.showString( "C");
             colorSensorConfigured = true;
-        }
+        // }
     }
 
     //% block="i2c read8 @ $address reg $register"
