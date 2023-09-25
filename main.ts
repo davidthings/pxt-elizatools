@@ -2,6 +2,8 @@ namespace elizatools {
 
     // Packing into number:  ( r << 16 ) | (g << 8 ) | b
     // Sending to ws2812   ---b---g---r--->
+    // Added some text to pxt.json to disable BT 
+    // this helps with console output!
 
     //% block="set ring led $cv"
     //% group="Ring"
@@ -18,7 +20,7 @@ namespace elizatools {
             e[j * 3 + 1] = rColor;
             e[j * 3 + 2] = bColor;
         }
-        ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
+        // ws2812b.setBufferMode(DigitalPin.P8, ws2812b.BUFFER_MODE_RGB );
         ws2812b.sendBuffer(e, DigitalPin.P8 );
     }
 
@@ -37,8 +39,12 @@ namespace elizatools {
             f[k * 3 + 1] = rColor2;
             f[k * 3 + 2] = bColor2;
         }
-        ws2812b.setBufferMode(DigitalPin.P16, ws2812b.BUFFER_MODE_RGB);
-        ws2812b.sendBuffer(f, DigitalPin.P16);
+
+        // ws2812b.setBufferMode(DigitalPin.P16, 1)
+        ws2812b.sendBuffer(f, DigitalPin.P16)
+
+        // ws2812b.setBufferMode(DigitalPin.P16, ws2812b.BUFFER_MODE_RGB);
+        // ws2812b.sendBuffer(f, DigitalPin.P16);
     }
 
     //% block
@@ -104,9 +110,9 @@ namespace elizatools {
     //% block
     //% group="ColorSensor"
     export function colorSensorReadId(): number {
-        let id3 = i2cReadRegister8(colorSensorAddress, colorSensorIdRegister);
+        let id32 = i2cReadRegister8(colorSensorAddress, colorSensorIdRegister);
         // basic.showNumber( id )
-        return id3;
+        return id32;
     }
 
     //% block
@@ -120,9 +126,9 @@ namespace elizatools {
     //% block
     //% group="ColorSensor"
     export function colorSensorReadEnable(): number {
-        let status = i2cReadRegister8(colorSensorAddress, colorSensorEnableRegister);
+        let status2 = i2cReadRegister8(colorSensorAddress, colorSensorEnableRegister);
         // basic.showNumber( id )
-        return status;
+        return status2;
     }
 
     //% block
@@ -134,13 +140,13 @@ namespace elizatools {
 
         colorSensorConfigure();
         
-        // if (colorSensorConfigured) {
+        if (colorSensorConfigured) {
             rSense = i2cReadRegister16(colorSensorAddress, colorSensorRedRegister );
             gSense = i2cReadRegister16(colorSensorAddress, colorSensorGreenRegister );
             bSense = i2cReadRegister16(colorSensorAddress, colorSensorBlueRegister);
-        //}
+        }
 
-/*
+
         let rColor22 = ( rSense >> 8 ) & 0xFF;
         let gColor22 = ( gSense >> 8 ) & 0xFF;
         let bColor22 = ( bSense >> 8 ) & 0xFF;
@@ -152,21 +158,41 @@ namespace elizatools {
         let cMax = (rColor22 > gColor22) ? rColor22 : gColor22;
         cMax = (bColor22 > cMax) ? bColor22 : cMax;
 
-        rColor22 = 0x0F * rColor22 / cMax;
-        gColor22 = 0x0F * gColor22 / cMax;
-        bColor22 = 0x0F * bColor22 / cMax;
+        rColor22 = 32 * rColor22 / cMax;
+        gColor22 = 32 * gColor22 / cMax;
+        bColor22 = 32 * bColor22 / cMax;
 
         // basic.showNumber( rColor >> 4 );
 
-        return ( rColor22 << 16 ) | (gColor22 << 8 ) | bColor22;
-*/
+        return (rColor22 << 16) | (gColor22 << 8) | bColor22;
+        // return (rSense << 16) | (gSense << 8) | bSense;
 
-    return rSense + gSense + bSense;
+
+   // return rSense + gSense + bSense;
 
     }
 
+    //% block
+    //% group="ColorSensor"
+    export function colorGetRed( color:number ): number {
+        return ( color >> 16 ) & 0xFF;
+    }
+
+    //% block
+    //% group="ColorSensor"
+    export function colorGetGreen(color: number): number {
+        return ( color >> 8 ) & 0xFF;
+    }
+
+    //% block
+    //% group="ColorSensor"
+    export function colorGetBlue(color: number): number {
+        return ( color & 0xFF );
+    }
+
+
     function colorSensorConfigure() {
-        // if ( !colorSensorConfigured && checkColorSensor() ) {
+        if ( !colorSensorConfigured && checkColorSensor() ) {
             // turn it on
             // Control Reg:  PON
             i2cWriteRegister(colorSensorAddress, colorSensorEnableRegister, 0x01 )
@@ -189,7 +215,7 @@ namespace elizatools {
 
 //            basic.showString( "C");
             colorSensorConfigured = true;
-        // }
+        }
     }
 
     //% block="i2c read8 @ $address reg $register"
@@ -218,7 +244,7 @@ namespace elizatools {
 
     //% block="i2c write8 @$address reg $register v $value"
     //% group="I2C"
-    export function i2cWriteRegister(address: number, register: number, value: number) {
+    export function i2cWriteRegister8_8(address: number, register: number, value: number) {
         pins.i2cWriteNumber(
             address,
             register,
@@ -228,11 +254,22 @@ namespace elizatools {
         pins.i2cWriteNumber(address, value, NumberFormat.UInt8LE, false)
     }
 
+    //% block="i2c write8 @$address reg $register v $value"
+    //% group="I2C"
+    export function i2cWriteRegister(address: number, register: number, value: number) {
+        pins.i2cWriteNumber(
+            address,
+            register | ( value << 8 ),
+            NumberFormat.UInt16LE,
+            false
+        )
+        // pins.i2cWriteNumber(address, value, NumberFormat.UInt8LE, false)
+    }
 
     //% block
     //% group="Misc"
-    export function showA0() {
-        basic.showNumber(pins.analogReadPin(AnalogPin.P0))
-    }
+    // export function showA0() {
+    //    basic.showNumber(pins.analogReadPin(AnalogPin.P0))
+    // }
 
 }
