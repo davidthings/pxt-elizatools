@@ -1,3 +1,4 @@
+//% color="#FE99F8"
 namespace elizatools {
 
     // Packing into number:  ( r << 16 ) | (g << 8 ) | b
@@ -158,9 +159,9 @@ namespace elizatools {
         let cMax = (rColor22 > gColor22) ? rColor22 : gColor22;
         cMax = (bColor22 > cMax) ? bColor22 : cMax;
 
-        rColor22 = 32 * rColor22 / cMax;
-        gColor22 = 32 * gColor22 / cMax;
-        bColor22 = 32 * bColor22 / cMax;
+        rColor22 = 16 * rColor22 / cMax;
+        gColor22 = 16 * gColor22 / cMax;
+        bColor22 = 16 * bColor22 / cMax;
 
         // basic.showNumber( rColor >> 4 );
 
