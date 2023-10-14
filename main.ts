@@ -25,9 +25,6 @@ namespace elizatools {
         ws2812b.sendBuffer(e, DigitalPin.P8 );
     }
 
-    //% block="set head leds $cv"
-    //% group="Ring"
-    //% cv.shadow="colorNumberPicker"
     export function headDirect(cv: number) {
         let f = pins.createBuffer(3 * 3)
 
@@ -48,16 +45,12 @@ namespace elizatools {
         // ws2812b.sendBuffer(f, DigitalPin.P16);
     }
 
-    //% block
-    //% group="Charger"
     export function checkCharger(): boolean {
         let id = i2cReadRegister8( 0x6B, 0x48 )
         // basic.showNumber( id )
         return ( id == 0x19 )
     }
 
-    //% block
-    //% group="IMU"
     export function checkIMU(): boolean {
         let id2 = i2cReadRegister8( 0x68, 0x75 )
         return (id2 == 0x4E)
@@ -108,24 +101,18 @@ namespace elizatools {
         return (id3 == colorSensorId )
     }
 
-    //% block
-    //% group="ColorSensor"
     export function colorSensorReadId(): number {
         let id32 = i2cReadRegister8(colorSensorAddress, colorSensorIdRegister);
         // basic.showNumber( id )
         return id32;
     }
 
-    //% block
-    //% group="ColorSensor"
     export function colorSensorReadStatus(): number {
         let status = i2cReadRegister8(colorSensorAddress, colorSensorStatusRegister );
         // basic.showNumber( id )
         return status;
     }
 
-    //% block
-    //% group="ColorSensor"
     export function colorSensorReadEnable(): number {
         let status2 = i2cReadRegister8(colorSensorAddress, colorSensorEnableRegister);
         // basic.showNumber( id )
@@ -173,24 +160,17 @@ namespace elizatools {
 
     }
 
-    //% block
-    //% group="ColorSensor"
     export function colorGetRed( color:number ): number {
         return ( color >> 16 ) & 0xFF;
     }
 
-    //% block
-    //% group="ColorSensor"
     export function colorGetGreen(color: number): number {
         return ( color >> 8 ) & 0xFF;
     }
 
-    //% block
-    //% group="ColorSensor"
     export function colorGetBlue(color: number): number {
         return ( color & 0xFF );
     }
-
 
     function colorSensorConfigure() {
         if ( !colorSensorConfigured && checkColorSensor() ) {
@@ -219,8 +199,6 @@ namespace elizatools {
         }
     }
 
-    //% block="i2c read8 @ $address reg $register"
-    //% group="I2C"
     export function i2cReadRegister8(address: number, register: number): number {
         pins.i2cWriteNumber(
             address,
@@ -231,8 +209,6 @@ namespace elizatools {
         return pins.i2cReadNumber(address, NumberFormat.UInt8LE, false)
     }
 
-    //% block="i2c read16 @ $address reg $register"
-    //% group="I2C"
     export function i2cReadRegister16(address: number, register: number): number {
         pins.i2cWriteNumber(
             address,
@@ -243,8 +219,6 @@ namespace elizatools {
         return pins.i2cReadNumber(address, NumberFormat.UInt16LE, false)
     }
 
-    //% block="i2c write8 @$address reg $register v $value"
-    //% group="I2C"
     export function i2cWriteRegister8_8(address: number, register: number, value: number) {
         pins.i2cWriteNumber(
             address,
@@ -255,8 +229,6 @@ namespace elizatools {
         pins.i2cWriteNumber(address, value, NumberFormat.UInt8LE, false)
     }
 
-    //% block="i2c write8 @$address reg $register v $value"
-    //% group="I2C"
     export function i2cWriteRegister(address: number, register: number, value: number) {
         pins.i2cWriteNumber(
             address,
